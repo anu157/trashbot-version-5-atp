@@ -68,3 +68,15 @@ TRASH_CONFIRM_S = 1.5
 # = radians / 2 / 150.
 M_PER_S_PER_PWM = 0.0025
 RAD_PER_S_PER_PWM = 0.012
+
+# Visual odometry (navigation.VisualOdometryTracker) uses the camera instead
+# of commanded PWM to estimate position -- see visual_odometrysimple.py.
+# Set False to fall back to the plain PWM-based navigation.Odometry above.
+VO_ENABLED = True
+
+# Produced by calibration.py / calibrate_camera.py (np.savez with
+# camera_matrix + dist_coeffs). If this file doesn't exist yet, main.py
+# falls back to a rough pinhole estimate from FRAME_WIDTH/HEIGHT and
+# CAMERA_HFOV_DEG above -- good enough to test the wiring, but run a real
+# calibration before trusting VO's numbers.
+CAMERA_CALIBRATION_FILE = "camera_calibration.npz"
