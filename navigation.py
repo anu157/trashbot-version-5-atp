@@ -34,6 +34,55 @@ class Odometry:
         return Pose(self.pose.x, self.pose.y, self.pose.theta)
 
 
+class VisualOdometryTracker:
+    """Estimates pose from the camera (visual_odometrysimple.VisualOdometry)
+    instead of commanded PWM. Scale comes from the AprilTag on the person's
+    back whenever it's visible (see VisualOdometry docstring); between
+    sightings the last known scale is held over, so this alone still drifts
+    -- just less, and in a different way, than pure PWM dead reckoning.
+
+    Falls back to one tick of PWM integration only when VO returns nothing
+    at all for a frame (e.g. cold start, or optical flow lost every feature
+    -- a fully dark frame, a hard camera jolt). This keeps `pose` moving
+    sensibly through the rare tick VO can't handle, rather than freezing.
+    """
+
+    def __init__(self, camera_matrix, dist_coeffs=None):
+        from visual_odometrysimple import VisualOdometry
+        self.vo = VisualOdometry(camera_matrix, dist_coeffs)
+        self.pose = Pose()
+        self.frames_without_scale_fix = 0  # ticks since the tag was last visible
+
+    def update(self, frame, gray, tag_corners, tag_size_m, left_pwm, right_pwm, dt):
+        """Call once per camera frame. tag_corners: obs.person.corners, or
+        None if the person's tag isn't visible this frame. Returns
+        scale_valid (True if this tick's scale came from a fresh tag
+        sighting, False if held-over or PWM-fallback) so callers can decide
+        how much to trust the pose, e.g. widen a search radius after many
+        False ticks in a row."""
+        dx, dy, dtheta, scale_valid = self.vo.update(frame, gray, tag_corners, tag_size_m)
+
+        if dx == 0.0 and dy == 0.0 and dtheta == 0.0:
+            # VO produced nothing usable this tick -- fall back to PWM
+            # integration for just this one tick rather than standing still.
+            v = (left_pwm + right_pwm) / 2 * config.M_PER_S_PER_PWM
+            w = (right_pwm - left_pwm) / 2 * config.RAD_PER_S_PER_PWM
+            dy = v * dt      # PWM model's "forward" maps onto VO's forward axis
+            dx = 0.0
+            dtheta = w * dt
+
+        p = self.pose
+        p.x += dx * math.cos(p.theta) - dy * math.sin(p.theta)
+        p.y += dx * math.sin(p.theta) + dy * math.cos(p.theta)
+        p.theta = wrap_angle(p.theta + dtheta)
+
+        self.frames_without_scale_fix = 0 if scale_valid else self.frames_without_scale_fix + 1
+        return scale_valid
+
+    def snapshot(self):
+        return Pose(self.pose.x, self.pose.y, self.pose.theta)
+
+
 def wrap_angle(a):
     return (a + math.pi) % (2 * math.pi) - math.pi
 
