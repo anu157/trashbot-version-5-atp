@@ -35,7 +35,7 @@ class Odometry:
 
 
 class VisualOdometryTracker:
-    """Estimates pose from the camera (visual_odometrysimple.VisualOdometry)
+    """Estimates pose from the camera (visualodometry_simple.VisualOdometry)
     instead of commanded PWM. Scale comes from the AprilTag on the person's
     back whenever it's visible (see VisualOdometry docstring); between
     sightings the last known scale is held over, so this alone still drifts
@@ -48,7 +48,7 @@ class VisualOdometryTracker:
     """
 
     def __init__(self, camera_matrix, dist_coeffs=None):
-        from visual_odometrysimple import VisualOdometry
+        from visualodometry_simple import VisualOdometry
         self.vo = VisualOdometry(camera_matrix, dist_coeffs)
         self.pose = Pose()
         self.frames_without_scale_fix = 0  # ticks since the tag was last visible
