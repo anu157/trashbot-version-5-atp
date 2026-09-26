@@ -36,7 +36,10 @@ class Target:
     distance: float    # meters (estimated from apparent size)
     box: tuple         # (x1, y1, x2, y2) pixels, for drawing
     confidence: float = 1.0
-    label: str = "unknown"
+    corners: object = None  # 4x2 np.array of raw AprilTag corners, person only.
+                             # Used by visual_odometrysimple.VisualOdometry's
+                             # solvePnP scale fix -- None for bin Targets.
+
 
 # ------------------------------------------------------------ person tag ----
 class PersonTracker:
@@ -61,6 +64,7 @@ class PersonTracker:
                 bearing=bearing_of(tag.center[0], w),
                 distance=distance,
                 box=(int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())),
+                corners=corners,
             )
         return None
 
