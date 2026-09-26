@@ -110,6 +110,11 @@ if __name__ == '__main__':
     print("camera matrix:\n", camera_matrix)
     print("distortion coefficients: ", dist_coefs.ravel())
 
+    # Saved so main.py can load it straight into VisualOdometryTracker --
+    # see config.CAMERA_CALIBRATION_FILE.
+    np.savez("camera_calibration.npz", camera_matrix=camera_matrix, dist_coeffs=dist_coefs)
+    print("\nSaved camera_matrix/dist_coeffs to camera_calibration.npz")
+
     # undistort the image with the calibration
     print('')
     for fn in img_names if debug_dir else []:
