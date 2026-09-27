@@ -48,7 +48,7 @@ class VisualOdometryTracker:
     """
 
     def __init__(self, camera_matrix, dist_coeffs=None):
-        from visual_odometrysimple import VisualOdometry
+        from visualodometry_simple import VisualOdometry
         self.vo = VisualOdometry(camera_matrix, dist_coeffs)
         self.pose = Pose()
         self.frames_without_scale_fix = 0  # ticks since the tag was last visible
