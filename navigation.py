@@ -35,7 +35,7 @@ class Odometry:
 
 
 class VisualOdometryTracker:
-    """Estimates pose from the camera (visual_odometrysimple.VisualOdometry)
+    """Estimates pose from the camera (visualodometry_simple.VisualOdometry)
     instead of commanded PWM. Scale comes from the AprilTag on the person's
     back whenever it's visible (see VisualOdometry docstring); between
     sightings the last known scale is held over, so this alone still drifts
